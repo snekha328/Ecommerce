@@ -1,0 +1,41 @@
+const productController = require("express").Router()
+const Product = require("../Product")
+const {verifyToken} = require('../middleware/verifyToken')
+
+
+productController.get('/',verifyToken,async(req,res)=>{
+    const category = req.query.category;
+    try{
+        //req.query = {category: 'women'}
+        const products = await Product.find({category:category});
+        return res.status(200).json(products)
+    }catch(error){
+        console.error(error)
+    }
+})
+
+
+productController.get('/find/:id',verifyToken,async(req,res)=>{
+    try{
+        const productId = req.params.id
+        const product = await Product.findById(productId)
+        if(!product){
+            return res.status(500).json({msg:"No product with id"})
+        }
+        return res.status(200).json(product)
+    }catch(error){
+        console.error(error)
+    }
+})
+
+productController.post('/',async(req,res)=>{
+    try {
+        const newProduct = await Product.create({...req.body})
+        return res.status(201).json(newProduct)
+    } catch (error) {
+        console.error(error)
+    }
+})
+
+
+module.exports = productController
